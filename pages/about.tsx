@@ -41,7 +41,7 @@ const About = () => {
           <Grid container spacing={2}>
             <Grid item sm spacing={2} container direction="column" justifyContent="center" alignItems="center">
               <Grid item marginTop={2}>
-                {!isAboutImgLoaded ? (
+                {isInfoLoading ? (
                   <Skeletons type="image" />
                 ) : (
                   <Image
@@ -106,15 +106,15 @@ const About = () => {
                 <Grid item container justifyContent="center" alignItems="center">
                   {isInfoLoading
                     ? [1, 2, 3, 4].map((ind: number) => {
-                        return <Skeletons key={ind} type="iconSmall" />
-                      })
+                      return <Skeletons key={ind} type="iconSmall" />
+                    })
                     : info?.socialMedias.map((val: SocialMediaType, ind: number) => {
-                        return (
-                          <a key={ind} href={val.url} target="_blank" rel="noopener noreferrer">
-                            <IconButton>{SocialMediaIcon(val.name)}</IconButton>
-                          </a>
-                        )
-                      })}
+                      return (
+                        <a key={ind} href={val.url} target="_blank" rel="noopener noreferrer">
+                          <IconButton>{SocialMediaIcon(val.name)}</IconButton>
+                        </a>
+                      )
+                    })}
                 </Grid>
               </Grid>
             </Grid>
