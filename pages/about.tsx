@@ -41,7 +41,7 @@ const About = () => {
           <Grid container spacing={2}>
             <Grid item sm spacing={2} container direction="column" justifyContent="center" alignItems="center">
               <Grid item marginTop={2}>
-                {isInfoLoading ? (
+                {isAboutImgLoaded ? (
                   <Skeletons type="image" />
                 ) : (
                   <Image
