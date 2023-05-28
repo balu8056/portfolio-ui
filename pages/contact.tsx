@@ -1,14 +1,25 @@
-import { Button, Grid, IconButton, Paper, TextField, Typography } from '@mui/material'
+import {
+  Button,
+  Grid,
+  IconButton,
+  Paper,
+  TextField,
+  Typography,
+  Backdrop,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  AlertColor,
+} from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useActivePath } from 'src/contexts/activeLink'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import PhoneAndroidOutlinedIcon from '@mui/icons-material/PhoneAndroidOutlined'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 import { InfoType, SocialMediaType } from 'src/lib/interfaces'
-import { useInfoGetById } from 'src/lib/apiHelpers'
+import { useInfoGetById, useEmailSend } from 'src/lib/apiHelpers'
 import Skeletons from 'src/components/Skeletons'
 import SocialMediaIcon from 'src/components/SocialMediaIcon'
-// import SendEmail from 'src/lib/sendEmail'
 
 const Contact = () => {
   const { setActivePath } = useActivePath()
@@ -16,10 +27,26 @@ const Contact = () => {
   const [info, setInfo] = useState<InfoType | null>(null)
   const { data: infoData, isLoading: isInfoLoading } = useInfoGetById(`${process.env.PORTFOLIO_INFO_ID}` || '')
 
-  const [sendName, setSendName] = useState<string>('')
-  const [sendEmail, setSendEmail] = useState<string>('')
-  const [sendSub, setSendSub] = useState<string>('')
-  const [sendMes, setSendMes] = useState<string>('')
+  const [isLoadingForEmailSend, setIsLoadingForEmailSend] = useState<boolean>(false)
+  const { trigger: EmailTrigger } = useEmailSend()
+  const [open, setOpen] = useState<boolean>(false)
+  const [snackbarMes, setSnackbarMes] = useState<{ severity: AlertColor; msg: string }>({
+    severity: 'success',
+    msg: '',
+  })
+
+  const [senderName, setSenderName] = useState<string>('')
+  const [senderEmail, setSenderEmail] = useState<string>('')
+  const [emailSub, setEmailSub] = useState<string>('')
+  const [emailMes, setEmailMes] = useState<string>('')
+
+  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return
+    }
+
+    setOpen(false)
+  }
 
   useEffect(() => {
     setActivePath('Contact')
@@ -34,12 +61,22 @@ const Contact = () => {
   }, [isInfoLoading, infoData])
 
   const handleEmailSend = () => {
-    console.log(sendName)
-    console.log(sendEmail)
-    console.log(sendSub)
-    console.log(sendMes)
-
-    // SendEmail(sendName, sendEmail, sendSub, sendMes)
+    setIsLoadingForEmailSend(true)
+    EmailTrigger({
+      senderName: senderName,
+      senderEmail: senderEmail,
+      subject: emailSub,
+      msg: emailMes,
+    })
+      .then((res) => {
+        setSnackbarMes({ severity: 'success', msg: 'Email sent Successfully!!!' })
+        setIsLoadingForEmailSend(false)
+        setOpen(true)
+      })
+      .catch((err) => {
+        setSnackbarMes({ severity: 'error', msg: 'Email not sent due to error!!!' })
+        setIsLoadingForEmailSend(false)
+      })
   }
 
   return (
@@ -53,7 +90,18 @@ const Contact = () => {
           }}
         >
           <Grid container direction="row">
-            <Grid item sm xs margin={2}>
+            <Grid item sm xs margin={2} sx={{ position: 'relative' }}>
+              <Backdrop
+                sx={{
+                  backgroundColor: 'transparent',
+                  position: 'absolute',
+                  color: 'linear-gradient(177.9deg, rgb(58, 62, 88) 3.6%, rgb(119, 127, 148) 105.8%)',
+                  zIndex: (theme) => theme.zIndex.drawer + 1,
+                }}
+                open={isLoadingForEmailSend}
+              >
+                <CircularProgress color="inherit" />
+              </Backdrop>
               <Grid item container direction="column">
                 <Typography gutterBottom variant="h4">
                   Send Message
@@ -65,7 +113,7 @@ const Contact = () => {
                   variant="outlined"
                   sx={{ marginY: 1 }}
                   fullWidth
-                  onChange={(e) => setSendName(e.target.value)}
+                  onChange={(e) => setSenderName(e.target.value)}
                 />
 
                 <TextField
@@ -73,7 +121,7 @@ const Contact = () => {
                   variant="outlined"
                   sx={{ marginY: 1 }}
                   fullWidth
-                  onChange={(e) => setSendEmail(e.target.value)}
+                  onChange={(e) => setSenderEmail(e.target.value)}
                 />
 
                 <TextField
@@ -81,7 +129,7 @@ const Contact = () => {
                   variant="outlined"
                   sx={{ marginY: 1 }}
                   fullWidth
-                  onChange={(e) => setSendSub(e.target.value)}
+                  onChange={(e) => setEmailSub(e.target.value)}
                 />
 
                 <TextField
@@ -90,13 +138,14 @@ const Contact = () => {
                   rows={5}
                   sx={{ marginY: 1 }}
                   fullWidth
-                  onChange={(e) => setSendMes(e.target.value)}
+                  onChange={(e) => setEmailMes(e.target.value)}
                 />
 
                 <Button
                   onClick={handleEmailSend}
                   variant="contained"
                   sx={{ padding: 1.5, width: '50%', marginTop: 4, borderRadius: '50px' }}
+                  disabled={isLoadingForEmailSend}
                 >
                   Send Message
                 </Button>
@@ -134,20 +183,30 @@ const Contact = () => {
               <Grid item container sx={{ marginTop: 1, justifyContent: { xs: 'center', md: 'left' } }} direction="row">
                 {isInfoLoading
                   ? [1, 2, 3, 4].map((ind: number) => {
-                      return <Skeletons key={ind} type="iconSmall" />
-                    })
+                    return <Skeletons key={ind} type="iconSmall" />
+                  })
                   : info?.socialMedias.map((val: SocialMediaType, ind: number) => {
-                      return (
-                        <a key={ind} target="_blank" href={val.url} rel="noopener noreferrer">
-                          <IconButton>{SocialMediaIcon(val.name)}</IconButton>
-                        </a>
-                      )
-                    })}
+                    return (
+                      <a key={ind} target="_blank" href={val.url} rel="noopener noreferrer">
+                        <IconButton>{SocialMediaIcon(val.name)}</IconButton>
+                      </a>
+                    )
+                  })}
               </Grid>
             </Grid>
           </Grid>
         </Paper>
       </div>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={open}
+        autoHideDuration={3000}
+        onClose={handleClose}
+      >
+        <Alert onClose={handleClose} severity={snackbarMes.severity} sx={{ width: '100%' }}>
+          {snackbarMes.msg}
+        </Alert>
+      </Snackbar>
     </>
   )
 }
