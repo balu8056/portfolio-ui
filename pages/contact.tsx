@@ -71,10 +71,14 @@ const Contact = () => {
       .then((res) => {
         setSnackbarMes({ severity: 'success', msg: 'Email sent Successfully!!!' })
         setIsLoadingForEmailSend(false)
+        setSenderName('')
+        setSenderEmail('')
+        setEmailSub('')
+        setEmailMes('')
         setOpen(true)
       })
       .catch((err) => {
-        setSnackbarMes({ severity: 'error', msg: 'Email not sent due to error!!!' })
+        setSnackbarMes({ severity: 'error', msg: 'Email not sent due to error, Try Again!' })
         setIsLoadingForEmailSend(false)
       })
   }
@@ -113,6 +117,7 @@ const Contact = () => {
                   variant="outlined"
                   sx={{ marginY: 1 }}
                   fullWidth
+                  value={senderName}
                   onChange={(e) => setSenderName(e.target.value)}
                 />
 
@@ -121,6 +126,7 @@ const Contact = () => {
                   variant="outlined"
                   sx={{ marginY: 1 }}
                   fullWidth
+                  value={senderEmail}
                   onChange={(e) => setSenderEmail(e.target.value)}
                 />
 
@@ -129,6 +135,7 @@ const Contact = () => {
                   variant="outlined"
                   sx={{ marginY: 1 }}
                   fullWidth
+                  value={emailSub}
                   onChange={(e) => setEmailSub(e.target.value)}
                 />
 
@@ -138,6 +145,7 @@ const Contact = () => {
                   rows={5}
                   sx={{ marginY: 1 }}
                   fullWidth
+                  value={emailMes}
                   onChange={(e) => setEmailMes(e.target.value)}
                 />
 
