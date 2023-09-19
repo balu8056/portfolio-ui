@@ -113,7 +113,7 @@ const Experience = () => {
                     gutterBottom
                     align="left"
                     color="#fff"
-                    dangerouslySetInnerHTML={{ __html: '<ul><li>sdf</li></ul>' }}
+                    dangerouslySetInnerHTML={{ __html: workRes.description }}
                   ></Typography>
                 </Grid>
               ))}
