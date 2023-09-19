@@ -153,7 +153,7 @@ const Experience = () => {
           )}
         </Grid>
 
-        <Grid item sx={{ marginY: 2 }}>
+        {/* <Grid item sx={{ marginY: 2 }}>
           <Typography gutterBottom align="center" variant="h4" color="#fff">
             Certifications
           </Typography>
@@ -182,7 +182,7 @@ const Experience = () => {
               ))}
             </Grid>
           )}
-        </Grid>
+        </Grid> */}
       </Grid>
     </>
   )
