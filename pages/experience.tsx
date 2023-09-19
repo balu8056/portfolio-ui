@@ -105,7 +105,7 @@ const Experience = () => {
           ) : (
             <Grid container item justifyContent="start" sx={{ paddingX: { md: '100px', xs: '10px' } }}>
               {works.map((workRes: WorkType, ind: number) => (
-                <Grid item key={ind}>
+                <Grid item key={ind} rowSpacing={4}>
                   <Typography variant="h6" color="#fff">
                     {workRes.heading}
                   </Typography>
